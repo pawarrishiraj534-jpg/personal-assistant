@@ -1,0 +1,157 @@
+
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#050b18">
+<title>My AI Assistant</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;background:#050b18;color:white;
+ font-family:Arial,sans-serif;
+}
+header{
+ text-align:center;padding:22px;
+ color:#40d9ff;border-bottom:1px solid #16415f;
+}
+.core{
+ width:130px;height:130px;border:2px solid #40d9ff;
+ border-radius:50%;display:grid;place-items:center;
+ margin:25px auto;font-size:55px;
+ box-shadow:0 0 35px #078dff;
+ animation:pulse 2s infinite;
+}
+@keyframes pulse{
+ 50%{box-shadow:0 0 55px #078dff}
+}
+#chat{height:48vh;overflow:auto;padding:15px}
+.msg{
+ padding:12px;margin:10px 0;border-radius:12px;
+ max-width:90%;line-height:1.5;white-space:pre-wrap;
+}
+.bot{background:#102d48}
+.user{background:#075985;margin-left:auto}
+.controls{
+ position:fixed;bottom:0;width:100%;
+ padding:12px;background:#081525;
+}
+.row{display:flex;gap:7px}
+input{
+ flex:1;min-width:0;padding:13px;
+ border-radius:10px;border:1px solid #2676a0;
+ background:#102237;color:white;font-size:16px;
+}
+button{
+ background:#087fc1;color:white;border:0;
+ border-radius:10px;padding:12px;font-size:15px;
+}
+.actions{display:flex;gap:10px;margin-top:10px}
+.actions button{flex:1;background:#12334e}
+</style>
+</head>
+<body>
+
+<header>
+<h2>PERSONAL AI ASSISTANT</h2>
+<div>● SYSTEM ONLINE</div>
+</header>
+
+<div class="core">🤖</div>
+
+<div id="chat">
+<div class="msg bot">
+नमस्कार! मेरा शुरुआती सिस्टम ऑनलाइन है।
+मैं तुम्हारी सहायता के लिए तैयार हूँ।
+</div>
+</div>
+
+<div class="controls">
+<div class="row">
+<input id="input" placeholder="अपना सवाल लिखो..."
+onkeydown="if(event.key==='Enter')send()">
+<button onclick="send()">Send</button>
+</div>
+<div class="actions">
+<button onclick="listen()">🎙️ बोलो</button>
+<button onclick="stopVoice()">🔇 बंद</button>
+</div>
+</div>
+
+<script>
+const chat=document.getElementById("chat");
+const input=document.getElementById("input");
+
+function message(text,type){
+ const d=document.createElement("div");
+ d.className="msg "+type;
+ d.textContent=text;
+ chat.appendChild(d);
+ chat.scrollTop=chat.scrollHeight;
+}
+
+function reply(q){
+ q=q.toLowerCase();
+
+ if(q.includes("समय")||q.includes("time"))
+ return "अभी समय है "+new Date().toLocaleTimeString("hi-IN");
+
+ if(q.includes("तारीख")||q.includes("date"))
+ return "आज की तारीख है "+new Date().toLocaleDateString("hi-IN");
+
+ if(q.includes("नमस्ते")||q.includes("hello"))
+ return "नमस्कार! बताइए, मैं आपकी क्या मदद करूँ?";
+
+ if(q.includes("कौन हो")||q.includes("who are you"))
+ return "मैं तुम्हारा Personal AI Assistant हूँ।";
+
+ if(q.includes("मदद")||q.includes("help"))
+ return "मैं अभी समय, तारीख और सामान्य Commands समझ सकता हूँ।";
+
+ return "मैंने तुम्हारा सवाल समझ लिया है। मेरा AI Brain अभी विकसित किया जा रहा है।";
+}
+
+function speak(text){
+ if(!("speechSynthesis" in window))return;
+ speechSynthesis.cancel();
+ const s=new SpeechSynthesisUtterance(text);
+ s.lang="hi-IN";
+ speechSynthesis.speak(s);
+}
+
+function send(){
+ const q=input.value.trim();
+ if(!q)return;
+ message(q,"user");
+ input.value="";
+ const answer=reply(q);
+ message(answer,"bot");
+ speak(answer);
+}
+
+function listen(){
+ const API=window.SpeechRecognition||
+ window.webkitSpeechRecognition;
+ if(!API){
+ alert("इस Browser में Voice Recognition उपलब्ध नहीं है।");
+ return;
+ }
+ const r=new API();
+ r.lang="hi-IN";
+ r.onresult=e=>{
+ input.value=e.results[0][0].transcript;
+ send();
+ };
+ r.onerror=()=>alert("आवाज़ समझने में समस्या हुई।");
+ r.start();
+}
+
+function stopVoice(){
+ if("speechSynthesis" in window)
+ speechSynthesis.cancel();
+}
+</script>
+
+</body>
+</html>
